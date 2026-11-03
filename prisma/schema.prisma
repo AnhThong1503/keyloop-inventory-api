@@ -1,0 +1,50 @@
+generator client {
+  provider            = "prisma-client"
+  output              = "../src/generated/prisma"
+  importFileExtension = "ts"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum ProposedAction {
+  NONE
+  UNDER_REVIEW
+  PRICE_REDUCTION_PLANNED
+  PROMOTION_PLANNED
+  TRANSFER_PLANNED
+  WHOLESALE_PLANNED
+
+  @@map("proposed_action")
+}
+
+model Dealership {
+  id        String    @id @default(uuid()) @db.Uuid
+  name      String    @unique @db.VarChar(100)
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  vehicles  Vehicle[]
+
+  @@map("dealerships")
+}
+
+model Vehicle {
+  id              String         @id @default(uuid()) @db.Uuid
+  vin             String         @unique @db.VarChar(17)
+  make            String         @db.VarChar(50)
+  model           String         @db.VarChar(50)
+  year            Int            @db.SmallInt
+  colour          String         @db.VarChar(30)
+  inventoryDate   DateTime       @map("inventory_date") @db.Date
+  proposedAction  ProposedAction @default(NONE) @map("proposed_action")
+  actionNote      String?        @map("action_note") @db.VarChar(500)
+  actionUpdatedAt DateTime?      @map("action_updated_at") @db.Timestamptz(3)
+  dealershipId    String         @map("dealership_id") @db.Uuid
+  dealership      Dealership     @relation(fields: [dealershipId], references: [id], onDelete: Restrict)
+  createdAt       DateTime       @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt       DateTime       @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  @@index([inventoryDate])
+  @@index([dealershipId])
+  @@map("vehicles")
+}
