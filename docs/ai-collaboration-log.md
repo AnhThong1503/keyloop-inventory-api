@@ -16,3 +16,10 @@
 - Two `npm run db:seed` runs each printed all 14 vehicles and `Seeded 2 dealerships and 14 vehicles.` The database count is 14; `\\d vehicles` confirmed the two CHECK constraints, foreign key and indexes.
 - `npm ci` passed with Prisma client generation after removing only repository-root `node_modules`. A second clean install passed with Docker services stopped and dotenv pointed at a nonexistent file, proving install/generation does not require `.env` or database connectivity; both services were then restored healthy.
 - Final `npm run typecheck`, `npm run lint`, `npm run format:check`, and `npm test` passed (1 placeholder test). npm reported 11 moderate dependency audit findings during clean install; no audit fix was run.
+
+## 2026-11-03 — P03
+
+- Added the injectable `Clock`, pure UTC calendar-day and aging-range functions, and strict Zod query, UUID parameter, and action-body schemas. Unit tests use fixed dates and cover age boundaries, UTC rollover, calendar edges, filter ranges, schema rejection cases, and all generated `ProposedAction` values.
+- `npm run test:unit` passed with 78 tests; `npm run typecheck`, `npm run lint`, and `npm run format:check` passed.
+- Mutation check: changing `isAgingStock` from `>` to `>=` caused 2 failures and 76 passes. The failing tests were the table-driven 90-day inventory case and the explicit 90/91 boundary case. After restoring `>`, all 78 unit tests passed again.
+- Ran the mutation before the checkpoint commit so the required gate was verified before recording the checkpoint.
