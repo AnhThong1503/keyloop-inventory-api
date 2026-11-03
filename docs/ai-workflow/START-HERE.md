@@ -12,14 +12,14 @@ The source PDF estimates 11 prompts at 30–60 minutes each, or 5.5–11 hours f
 
 ## Your steps
 
-1. Follow `WINDOWS-SETUP.md` from top to bottom. It installs WSL 2, VS Code, Git, GitHub CLI, Docker Desktop and Node 24, then authenticates GitHub.
+1. Follow [`WINDOWS-SETUP.md`](./WINDOWS-SETUP.md) from top to bottom. It installs WSL 2, VS Code, Git, GitHub CLI, Docker Desktop and Node 24, then authenticates GitHub.
 2. Create an empty **private** GitHub repository named `keyloop-inventory-api` (no README, license or `.gitignore`).
-3. Initialize the local folder on `main`, copy this starter pack into the root (including hidden `.github` files), make one baseline commit for the starter files, and push `main`. Then create `feature/copilot-build`, exactly as shown in `WINDOWS-SETUP.md`. This makes a valid PR target while keeping all agent implementation commits off `main`.
-4. Open the repository in VS Code and sign in to GitHub Copilot. Select **Agent**. Paste the complete contents of `MASTER-PROMPT.md` into Copilot Chat.
+3. Initialize the local folder on `main`, copy this starter pack into the root (including hidden `.github` files), make one baseline commit for the starter files, and push `main`. Then create `feature/copilot-build`, exactly as shown in [`WINDOWS-SETUP.md`](./WINDOWS-SETUP.md). This makes a valid PR target while keeping all agent implementation commits off `main`.
+4. Open the repository in VS Code and sign in to GitHub Copilot. Select **Agent**. Paste the complete contents of [`MASTER-PROMPT.md`](./MASTER-PROMPT.md) into Copilot Chat.
 5. Let Copilot complete P01. It will create `package.json` and `.env.example`, run checks, create the first checkpoint commit and push it to `feature/copilot-build`. Read the report and inspect the changes.
 6. Before P02, create your local environment file with `Copy-Item .env.example .env`. Make sure Docker Desktop says the engine is running. Tell Copilot to resume the master workflow.
 7. Let Copilot proceed through P02–P11. It must stop on failed quality gates and on human-only prerequisites. At every checkpoint, look at the test results, changed files, commit SHA and push result.
-8. At the end, use `docs/final-assessment-checklist.md` to review the audit report, fill the personal `TODO(user)` sections in the AI Collaboration Narrative using your real experience, create/review the Pull Request, merge it yourself, and record the 5–10 minute demo video.
+8. At the end, use [`final-assessment-checklist.md`](./final-assessment-checklist.md) to review the audit report, fill the personal `TODO(user)` sections in the AI Collaboration Narrative using your real experience, create/review the Pull Request, merge it yourself, and record the 5–10 minute demo video.
 
 ## What you must do yourself
 
@@ -41,7 +41,7 @@ Keep VS Code's approval controls enabled at first. Autopilot/Allow All can appro
 
 ## Resume after an agent limit
 
-Paste `RESUME-PROMPT.md` into the same Copilot workspace/session. The agent must inspect the log and Git history, find the last completed checkpoint and continue without repeating it.
+Paste [`RESUME-PROMPT.md`](./RESUME-PROMPT.md) into the same Copilot workspace/session. The agent must inspect the log and Git history, find the last completed checkpoint and continue without repeating it.
 
 ## Acceptance criteria that matter most
 
@@ -51,4 +51,3 @@ Paste `RESUME-PROMPT.md` into the same Copilot workspace/session. The agent must
 - Unit and integration tests use a separate test database; the safety guard rejects any database not ending in `_test`.
 - `npm run check` passes; clean clone follows README; OpenAPI and SDD match the implementation.
 - `git status` is clean; every checkpoint has one commit; `.env` and generated/build output are not tracked.
-

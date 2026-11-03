@@ -5,7 +5,7 @@ Paste this entire prompt into **GitHub Copilot Chat in Agent mode** after the st
 
 You are the implementation orchestrator for this repository.
 
-Read the root AGENTS.md, .github/copilot-instructions.md, docs/design-brief.md, docs/command-reference.md, docs/testing-strategy.md and docs/final-assessment-checklist.md first. Then inspect git status, the current branch and origin remote.
+Read the root AGENTS.md, .github/copilot-instructions.md, docs/design-brief.md, docs/ai-workflow/command-reference.md, docs/ai-workflow/testing-strategy.md and docs/ai-workflow/final-assessment-checklist.md first. Then inspect git status, the current branch and origin remote.
 
 Your job is to execute the source plan sequentially using these prompt files, in this exact order:
 1. .github/prompts/p01-scaffold.prompt.md
@@ -39,6 +39,6 @@ Git safety: only feature/copilot-build may be pushed. Never push or merge main, 
 
 Prompt P11 is the final audit. Follow its clean-clone test, but delete only the temporary clone directory you created and never delete Docker volumes. Create and push the v1.0.0 annotated tag only after all final checks pass. Do not merge the pull request; leave that to me.
 
-If you reach the VS Code agent request limit or lose session context, stop cleanly with the last completed prompt, its evidence, branch, commit SHA and next required action. Do not restart from P01. I will resume you with RESUME-PROMPT.md.
+If you reach the VS Code agent request limit or lose session context, stop cleanly with the last completed prompt, its evidence, branch, commit SHA and next required action. Do not restart from P01. I will resume you with docs/ai-workflow/RESUME-PROMPT.md.
 
 At the end, give me: overall PASS/FAIL/NOT VERIFIED table, repository branch and URL, commit history, tag status, all test/build/audit results, unresolved TODO(user) items, and the exact steps I still must do for the AI narrative, pull request merge and video.

@@ -56,7 +56,7 @@ Tick an item only after personally seeing its evidence. This checklist follows P
 - [ ] Demo data has just been reseeded. Screen is readable and no secrets/tokens/account pages are visible.
 - [ ] Video link/file can be opened by someone else.
 - [ ] Git history shows one commit per checkpoint, working tree is clean and tag `v1.0.0` exists.
-- [ ] `docs/ai-prompts/` and the AI log are committed; README is at repository root.
+- [ ] `.github/prompts/` and [the AI log](../ai-collaboration-log.md) are committed; README is at repository root.
 - [ ] Repository is accessible to the reviewer; PR merged as appropriate.
 
 ## Suggested 9-minute video
@@ -65,10 +65,10 @@ Tick an item only after personally seeing its evidence. This checklist follows P
 |---|---|---|---|
 | 0:00–0:40 | Introduction and scope | README title and stack | Scenario B, dealership manager, what is/is not in scope |
 | 0:40–2:00 | Architecture | SDD Mermaid diagram and folder tree | Modular monolith; derived aging; UTC/injected clock; common error envelope |
-| 2:00–3:00 | Data model and aging | `schema.prisma`, `inventory-age.ts`, seed | No stored aging flag; strict >90 rule; 89/90/91 examples |
+| 2:00–3:00 | Data model and aging | `prisma/schema.prisma`, `src/modules/vehicles/domain/inventory-age.ts`, `prisma/seed.ts` | No stored aging flag; strict >90 rule; 89/90/91 examples |
 | 3:00–5:30 | Live API demo | Terminal and Bruno/Postman or curl | Start DB/API; list, aging filter, make filter, 90 vs 91, PATCH then GET, 404, 400, health |
 | 5:30–6:45 | Tests | `npm test`, boundary test and mutation | Unit vs integration; isolated DB; demonstrate `>` to `>=` makes tests fail, then restore |
-| 6:45–8:15 | AI collaboration | AI log, saved prompts and one real correction | How prompts were used, what you verified, what AI got wrong and your decision |
+| 6:45–8:15 | AI collaboration | AI log, `.github/prompts/` and one real correction | How prompts were used, what you verified, what AI got wrong and your decision |
 | 8:15–9:00 | Trade-offs | Known limitations | Future auth, audit history, cursor pagination and CI; why out of scope |
 
 ## Recording checklist

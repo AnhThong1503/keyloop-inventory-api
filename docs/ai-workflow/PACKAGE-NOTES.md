@@ -1,16 +1,16 @@
 # Package contents and operating notes
 
-- `START-HERE.md`: short execution checklist and human responsibilities.
-- `WINDOWS-SETUP.md`: clean Windows installation, GitHub setup and Copilot launch.
+- [`START-HERE.md`](./START-HERE.md): short execution checklist and human responsibilities.
+- [`WINDOWS-SETUP.md`](./WINDOWS-SETUP.md): clean Windows installation, GitHub setup and Copilot launch.
 - `AGENTS.md`: standing rules for all coding-agent work, including secure automatic commit/push.
 - `.github/copilot-instructions.md`: Copilot entrypoint that points to `AGENTS.md`.
-- `.github/prompts/p01...p11.prompt.md`: the 11 source prompts in Claude's specified order, with the commit policy adapted for this workflow.
-- `MASTER-PROMPT.md`: paste once into Copilot Agent to orchestrate the 11 prompts sequentially.
-- `RESUME-PROMPT.md`: resume after session/request limits without repeating completed work.
-- `docs/design-brief.md`: the project brief embedded in the source Prompt 1.
+- [`.github/prompts/p01...p11.prompt.md`](../../.github/prompts/): the 11 source prompts in Claude's specified order, with the commit policy adapted for this workflow.
+- [`MASTER-PROMPT.md`](./MASTER-PROMPT.md): paste once into Copilot Agent to orchestrate the 11 prompts sequentially.
+- [`RESUME-PROMPT.md`](./RESUME-PROMPT.md): resume after session/request limits without repeating completed work.
+- [`docs/design-brief.md`](../design-brief.md): the project brief embedded in the source Prompt 1.
 
 ## Important Copilot detail
-VS Code has multiple agent harnesses. The `.prompt.md` files are kept in the standard `.github/prompts/` location and have prompt-file frontmatter, but prompt-file slash-command execution is currently documented for the Local harness. This package does **not** depend on slash commands: use `MASTER-PROMPT.md` by copying it into GitHub Copilot Agent Chat; it tells the agent to read each numbered file from the workspace.
+VS Code has multiple agent harnesses. The files in `.github/prompts/` use prompt-file frontmatter, but prompt-file slash-command execution is currently documented for the Local harness. This package does **not** depend on slash commands: use [`MASTER-PROMPT.md`](./MASTER-PROMPT.md) by copying it into GitHub Copilot Agent Chat; it tells the agent to read each numbered file from the workspace.
 
 ## Source fidelity and deliberate adaptations
 
@@ -23,4 +23,4 @@ VS Code has multiple agent harnesses. The `.prompt.md` files are kept in the sta
 7. The setup guide creates a one-time baseline commit on `main` containing only the starter pack, then branches `feature/copilot-build`; otherwise an empty remote would not have a `main` branch to target in the final PR. The coding agent itself is prohibited from pushing to or merging `main`.
 8. Human-only steps remain: Windows reboot/WSL setup, authentication, creating `.env`, approving privileged or network actions, reviewing the work, writing truthful personal AI-collaboration reflections, merging the PR and recording the video.
 
-The source plan itself contains a time estimate of 11 prompts at 30–60 minutes each, excluding the clean-machine setup and video work. See `START-HERE.md` for a practical schedule.
+The source plan itself contains a time estimate of 11 prompts at 30–60 minutes each, excluding the clean-machine setup and video work. See [`START-HERE.md`](./START-HERE.md) for a practical schedule.

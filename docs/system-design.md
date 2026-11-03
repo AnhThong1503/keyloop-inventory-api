@@ -22,6 +22,28 @@ the brief and implementation:
 - Authentication, authorization, a frontend, queues, and caching are out of
   scope.
 
+## Project structure
+
+```text
+.github/
+  copilot-instructions.md
+  prompts/                 P01–P11 implementation prompts
+docs/
+  ai-workflow/             setup, orchestration, and assessment references
+  design-brief.md
+  openapi.yaml
+  api-examples.md
+  testing.md
+  ai-collaboration-log.md
+src/
+  config/ db/ modules/ shared/
+  app.ts server.ts
+prisma/
+  schema.prisma migrations/ seed.ts
+tests/
+  unit/ integration/ helpers/ setup/
+```
+
 ## Functional and non-functional requirements
 
 ### Functional
@@ -69,20 +91,20 @@ flowchart LR
 
 ## Component responsibilities
 
-| Component                                  | Responsibility                                                                                                    |
-| ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------- |
-| `src/server.ts`                            | Loads validated environment settings, creates logger/Prisma/system clock, listens, and handles graceful shutdown. |
-| `src/app.ts`                               | Builds the Express application and middleware/router/error-handler chain; does not listen.                        |
-| `src/modules/vehicles/vehicle.routes.ts`   | Maps list, detail, and action routes to controllers.                                                              |
-| `vehicle.schemas.ts` and shared validation | Validates strict query, UUID parameter, and action-body inputs with Zod.                                          |
-| `vehicle.controller.ts`                    | Validates requests, invokes service operations, and writes HTTP responses.                                        |
-| `vehicle.service.ts`                       | Applies age filtering, coordinates the clock and repository, maps not-found cases, and builds list metadata.      |
-| `domain/inventory-age.ts`                  | Implements UTC-day age, the `> 90` rule, age-range resolution, and inventory-date bounds without I/O.             |
-| `vehicle.repository.ts`                    | Translates service filters to Prisma operations and loads dealership fields.                                      |
-| `vehicle.mapper.ts`                        | Derives response age/status and maps database records into API vehicle DTOs.                                      |
-| Health router                              | Runs `SELECT 1` with a two-second timeout and returns healthy/degraded status.                                    |
-| Shared middleware                          | Provides request IDs, structured request logging, error mapping, and common error types.                          |
-| Prisma schema/migrations/seed              | Define the PostgreSQL data model, schema changes, and repeatable demo records.                                    |
+| Component                                                       | Responsibility                                                                                                    |
+| --------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| `src/server.ts`                                                 | Loads validated environment settings, creates logger/Prisma/system clock, listens, and handles graceful shutdown. |
+| `src/app.ts`                                                    | Builds the Express application and middleware/router/error-handler chain; does not listen.                        |
+| `src/modules/vehicles/vehicle.routes.ts`                        | Maps list, detail, and action routes to controllers.                                                              |
+| `src/modules/vehicles/vehicle.schemas.ts` and shared validation | Validates strict query, UUID parameter, and action-body inputs with Zod.                                          |
+| `src/modules/vehicles/vehicle.controller.ts`                    | Validates requests, invokes service operations, and writes HTTP responses.                                        |
+| `src/modules/vehicles/vehicle.service.ts`                       | Applies age filtering, coordinates the clock and repository, maps not-found cases, and builds list metadata.      |
+| `src/modules/vehicles/domain/inventory-age.ts`                  | Implements UTC-day age, the `> 90` rule, age-range resolution, and inventory-date bounds without I/O.             |
+| `src/modules/vehicles/vehicle.repository.ts`                    | Translates service filters to Prisma operations and loads dealership fields.                                      |
+| `src/modules/vehicles/vehicle.mapper.ts`                        | Derives response age/status and maps database records into API vehicle DTOs.                                      |
+| Health router                                                   | Runs `SELECT 1` with a two-second timeout and returns healthy/degraded status.                                    |
+| Shared middleware                                               | Provides request IDs, structured request logging, error mapping, and common error types.                          |
+| Prisma schema/migrations/seed                                   | Define the PostgreSQL data model, schema changes, and repeatable demo records.                                    |
 
 ## Data model
 

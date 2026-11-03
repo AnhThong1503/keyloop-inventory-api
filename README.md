@@ -230,6 +230,10 @@ tests/
   unit/                  pure logic and isolated application behavior
   integration/           API/database behavior against the test database
 docs/                    design, API, test, and collaboration documentation
+  ai-workflow/           setup guidance, orchestration, and assessment references
+.github/
+  copilot-instructions.md Copilot entrypoint
+  prompts/               the eleven implementation prompts, in order
 ```
 
 ## Version pins and compatibility

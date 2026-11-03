@@ -7,13 +7,13 @@ package-lock.json
 # Supplied source-plan and reference documents are preserved verbatim.
 .github/prompts
 AGENTS.md
-MASTER-PROMPT.md
-PACKAGE-NOTES.md
-PROMPT-MAP.md
-RESUME-PROMPT.md
-START-HERE.md
-WINDOWS-SETUP.md
-docs/command-reference.md
+docs/ai-workflow/MASTER-PROMPT.md
+docs/ai-workflow/PACKAGE-NOTES.md
+docs/ai-workflow/PROMPT-MAP.md
+docs/ai-workflow/RESUME-PROMPT.md
+docs/ai-workflow/START-HERE.md
+docs/ai-workflow/WINDOWS-SETUP.md
+docs/ai-workflow/command-reference.md
 docs/design-brief.md
-docs/final-assessment-checklist.md
-docs/testing-strategy.md
+docs/ai-workflow/final-assessment-checklist.md
+docs/ai-workflow/testing-strategy.md
