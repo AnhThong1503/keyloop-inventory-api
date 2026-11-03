@@ -69,7 +69,7 @@ note clears it; actionUpdatedAt = Clock.now(). Unknown body fields give 400.
 Endpoints: GET /api/vehicles, GET /api/vehicles/:id, PATCH
 /api/vehicles/:id/action, GET /health.
 Success body: { data, meta } (meta on the list only).
-Vehicle fields: id, vin, make, model, year, colour, inventoryDate (YYYY-MMDD), ageInDays, isAgingStock, proposedAction, actionNote (string or null),
+Vehicle fields: id, vin, make, model, year, colour, inventoryDate (YYYY-MM-DD), ageInDays, isAgingStock, proposedAction, actionNote (string or null),
 actionUpdatedAt (ISO string or null), dealership { id, name }.
 List meta: page, pageSize, totalItems, totalPages, asOfDate (YYYY-MM-DD),
 agingThresholdDays.
