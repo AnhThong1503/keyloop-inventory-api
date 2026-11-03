@@ -63,3 +63,12 @@
 - The development `inventory_dev` vehicle count was 14 before the final test runs and remained 14 afterward. The integration setup used `inventory_test` at `127.0.0.1:5433`.
 - All temporary mutations were restored. Changing `>` to `>=` failed two cases in `tests/unit/inventory-age.test.ts`; reversing sort failed four list integration tests; removing case-insensitive make matching failed `filters by case-insensitive make and model and dealership`; preserving an omitted PATCH note failed `replaces the action and clears the note when omitted; NONE clears the plan`; changing `lte` to `lt` failed `applies inclusive minimum and maximum age filters`.
 - Installing the named coverage provider added 19 packages. npm reported 11 moderate audit findings; no audit fix was run.
+
+## 2026-11-03 — P09
+
+- Added `docs/openapi.yaml` for the four implemented endpoints and `docs/api-examples.md` with bash and PowerShell requests, live response captures, and a nine-call demo sequence. No product code changed.
+- Compared all six `ProposedAction` values in the OpenAPI schema with `prisma/schema.prisma`; they match. The contract examples use seeded IDs and dates consistent with the fixed `asOfDate` of `2026-10-29`.
+- `docker compose up -d --wait` passed. `npm run db:seed` seeded two dealerships and 14 vehicles on `2026-11-03` UTC. `npm run dev` served the documented list, make-filter, age-boundary, detail, PATCH/read-back, validation-error, not-found, and health requests. Responses returned the documented statuses; the aging list returned six items and the 89/90/91-day query showed the strict 90-day boundary. The PATCH update persisted on a subsequent GET.
+- `npm run openapi:lint` exited 0 with one `info-license` warning. No license was provided for this project, so no license was invented. `npm run format:check` passed.
+- Bruno/Postman/Swagger Editor import and list-call verification were NOT VERIFIED; no local GUI/API-client CLI was available, and repository material was not uploaded to a third party.
+- Two initial PowerShell `curl.exe` PATCH attempts had quoting errors and returned `INVALID_JSON`; the PATCH capture was rerun successfully with `Invoke-WebRequest` and returned HTTP 200.
