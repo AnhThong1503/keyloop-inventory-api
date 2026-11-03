@@ -29,7 +29,7 @@ cloned into a folder named `keyloop-inventory-api`.
 ### macOS/Linux (bash)
 
 ```sh
-git clone https://github.com/AnhThong1503/keyloop-inventory-api.git
+git clone --branch feature/copilot-build https://github.com/AnhThong1503/keyloop-inventory-api.git
 cd keyloop-inventory-api
 npm ci
 test -f .env || cp .env.example .env
@@ -42,7 +42,7 @@ npm run dev
 ### Windows PowerShell
 
 ```powershell
-git clone https://github.com/AnhThong1503/keyloop-inventory-api.git
+git clone --branch feature/copilot-build https://github.com/AnhThong1503/keyloop-inventory-api.git
 Set-Location keyloop-inventory-api
 npm ci
 if (-not (Test-Path .env)) { Copy-Item .env.example .env }

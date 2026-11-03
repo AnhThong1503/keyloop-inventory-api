@@ -27,7 +27,9 @@ paths:
         Filters are combined with AND. Make and model are trimmed,
         case-insensitive exact matches. Age bounds are inclusive. aging=true
         means ageInDays is at least 91; aging=false means ageInDays is at most
-        90. A contradictory age range returns an empty list. Results are
+        90. minAgeDays greater than maxAgeDays is invalid and returns 400.
+        Otherwise valid filters that combine to an empty range, such as
+        aging=true with maxAgeDays=90, return an empty list. Results are
         ordered by inventoryDate ascending, then id ascending.
       parameters:
         - $ref: "#/components/parameters/Make"

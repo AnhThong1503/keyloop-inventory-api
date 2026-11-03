@@ -224,8 +224,9 @@ is false and 91 days is true. The flag is derived and is not persisted.
   case-insensitive exact matches; dealership ID is a UUID.
 - `aging=true` means age at least 91; `aging=false` means age at most 90.
 - `minAgeDays`/`maxAgeDays` are inclusive integers from 0 to 36500, and the
-  minimum cannot exceed the maximum. Contradictory combined ranges produce an
-  empty 200 response.
+  minimum cannot exceed the maximum (otherwise the query returns 400).
+  Otherwise valid filters that combine to an empty range, such as
+  `aging=true&maxAgeDays=90`, produce an empty 200 response.
 - Age filters become inventory-date bounds calculated from the injected
   clock. SQL does not use `NOW()` or `CURRENT_DATE`.
 - Pages start at 1; page size is 1–100. Results sort by inventory date
