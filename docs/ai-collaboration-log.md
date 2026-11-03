@@ -23,3 +23,11 @@
 - `npm run test:unit` passed with 78 tests; `npm run typecheck`, `npm run lint`, and `npm run format:check` passed.
 - Mutation check: changing `isAgingStock` from `>` to `>=` caused 2 failures and 76 passes. The failing tests were the table-driven 90-day inventory case and the explicit 90/91 boundary case. After restoring `>`, all 78 unit tests passed again.
 - Ran the mutation before the checkpoint commit so the required gate was verified before recording the checkpoint.
+
+## 2026-11-03 — P04 (checkpoint pending)
+
+- Implemented validated configuration, Pino logging, request IDs and request logging, shared errors and validation, health checks, the Express app factory, and the server composition root. The closed-port Prisma experiment against `127.0.0.1:1` produced a `PrismaClientKnownRequestError` with code `P2010`, `meta.driverAdapterError`, and `cause.kind === "DatabaseNotReachable"`; the error handler maps that observed shape to 503 and leaves other P2010 errors as 500.
+- `npm run test:unit` passed with 115 tests; `npm run typecheck`, `npm run lint`, `npm run format:check`, and `npm run build` passed. The build created `dist/server.js`; `git grep -n DATABASE_URL -- src` found no matches.
+- Earlier runtime checks served `/health` with database-up status, returned the not-found envelope for an unknown route and `INVALID_JSON` for malformed JSON, returned 503 within 96 ms after stopping only the development database, and returned 200 after database recovery.
+- A production `npm start` run returned 200 from `/health` with database up. A synthetic in-process `process.emit("SIGINT")` exercised the shutdown handler and logged `shutdown started`, `http server closed`, and `database disconnected`, exiting 0.
+- The user then ran `npm start` in an interactive PowerShell terminal and confirmed the real Ctrl+C path logged `shutdown started` with `SIGINT`, `http server closed`, and `database disconnected`. This completes the required shutdown verification.
