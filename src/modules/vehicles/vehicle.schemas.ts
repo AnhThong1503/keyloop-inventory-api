@@ -52,9 +52,5 @@ export const updateActionBodySchema = z.strictObject({
     .transform((note) => (note === "" ? null : note)),
 });
 
-export type ListVehiclesQueryInput = z.input<typeof listVehiclesQuerySchema>;
 export type ListVehiclesQuery = z.infer<typeof listVehiclesQuerySchema>;
-export type VehicleIdParamsInput = z.input<typeof vehicleIdParamSchema>;
-export type VehicleIdParams = z.infer<typeof vehicleIdParamSchema>;
-export type UpdateActionBodyInput = z.input<typeof updateActionBodySchema>;
 export type UpdateActionBody = z.infer<typeof updateActionBodySchema>;
