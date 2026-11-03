@@ -24,10 +24,18 @@
 - Mutation check: changing `isAgingStock` from `>` to `>=` caused 2 failures and 76 passes. The failing tests were the table-driven 90-day inventory case and the explicit 90/91 boundary case. After restoring `>`, all 78 unit tests passed again.
 - Ran the mutation before the checkpoint commit so the required gate was verified before recording the checkpoint.
 
-## 2026-11-03 — P04 (checkpoint pending)
+## 2026-11-03 — P04
 
 - Implemented validated configuration, Pino logging, request IDs and request logging, shared errors and validation, health checks, the Express app factory, and the server composition root. The closed-port Prisma experiment against `127.0.0.1:1` produced a `PrismaClientKnownRequestError` with code `P2010`, `meta.driverAdapterError`, and `cause.kind === "DatabaseNotReachable"`; the error handler maps that observed shape to 503 and leaves other P2010 errors as 500.
 - `npm run test:unit` passed with 115 tests; `npm run typecheck`, `npm run lint`, `npm run format:check`, and `npm run build` passed. The build created `dist/server.js`; `git grep -n DATABASE_URL -- src` found no matches.
 - Earlier runtime checks served `/health` with database-up status, returned the not-found envelope for an unknown route and `INVALID_JSON` for malformed JSON, returned 503 within 96 ms after stopping only the development database, and returned 200 after database recovery.
 - A production `npm start` run returned 200 from `/health` with database up. A synthetic in-process `process.emit("SIGINT")` exercised the shutdown handler and logged `shutdown started`, `http server closed`, and `database disconnected`, exiting 0.
 - The user then ran `npm start` in an interactive PowerShell terminal and confirmed the real Ctrl+C path logged `shutdown started` with `SIGINT`, `http server closed`, and `database disconnected`. This completes the required shutdown verification.
+
+## 2026-11-03 — P05
+
+- Added the Prisma vehicle-list repository, DTO mapper, clock-based service, controller and routes mounted at `/api/vehicles`. Unit tests cover age-bound conversion, contradictory ranges without repository calls, pagination totals, and DTO ages 0, 89, 90 and 91. Added integration coverage for list ordering and shape, filters, aging boundaries, inclusive age bounds, pagination, and all required query-validation failures.
+- Added an integration test database URL guard, serial Vitest integration project, test-only migration setup, fixed-clock app/database helpers, and deterministic dealership/vehicle factories. Ran the guard with `TEST_DATABASE_URL` pointed at `inventory_dev`; integration setup rejected it before invoking migrations. The normal integration setup applied migrations only to `inventory_test` on `127.0.0.1:5433`.
+- `docker compose up -d --wait` and subsequent `docker compose ps` showed both databases healthy. `npm run test:unit` passed (131 tests), `npm run test:integration` passed (16 tests), and `npm test` passed (147 tests). `npm run typecheck`, `npm run lint`, `npm run format:check`, and `npm run build` passed; `dist/server.js` exists.
+- After the full test run, `docker compose exec db psql -U inventory -d inventory_dev -c "select count(*) from vehicles;"` returned 14. `rg` found no `NOW()` or `CURRENT_DATE` in `src`.
+- For R11, `npm run db:seed` completed with 14 vehicles; `npm run dev` served `curl.exe -sS -i "http://127.0.0.1:3000/api/vehicles?aging=true"` with HTTP 200, `totalItems: 6`, and `asOfDate: "2026-11-03"`. The test server was stopped and port 3000 is no longer listening.

@@ -2,6 +2,7 @@ import { describe, expect, test, vi } from "vitest";
 import request from "supertest";
 import { createApp } from "../../src/app.ts";
 import type { HealthPrismaClient } from "../../src/modules/health/health.routes.ts";
+import type { VehicleRepository } from "../../src/modules/vehicles/vehicle.repository.ts";
 import type { Clock } from "../../src/shared/clock.ts";
 import { createLoggerMock } from "./logger-mock.ts";
 
@@ -16,10 +17,14 @@ function createPrismaStub(query: () => Promise<unknown> = async () => 1): Health
 
 function createTestApp(query?: () => Promise<unknown>) {
   const logger = createLoggerMock();
+  const vehicleRepository: VehicleRepository = {
+    findVehicles: vi.fn(async () => ({ items: [], total: 0 })),
+  };
   const app = createApp({
     prisma: createPrismaStub(query),
     clock: fixedClock,
     logger,
+    vehicleRepository,
   });
   return { app, logger };
 }
