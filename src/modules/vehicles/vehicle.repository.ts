@@ -29,6 +29,7 @@ export interface VehicleRepository {
     items: VehicleRecord[];
     total: number;
   }>;
+  findVehicleById(id: string): Promise<VehicleRecord | null>;
 }
 
 export type PrismaVehicleClient = Pick<PrismaClient, "vehicle" | "$transaction">;
@@ -62,6 +63,12 @@ export function createVehicleRepository(prisma: PrismaVehicleClient): VehicleRep
       ]);
 
       return { items, total };
+    },
+    async findVehicleById(id) {
+      return prisma.vehicle.findUnique({
+        where: { id },
+        include: { dealership: { select: { id: true, name: true } } },
+      });
     },
   };
 }

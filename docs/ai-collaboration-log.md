@@ -39,3 +39,10 @@
 - `docker compose up -d --wait` and subsequent `docker compose ps` showed both databases healthy. `npm run test:unit` passed (131 tests), `npm run test:integration` passed (16 tests), and `npm test` passed (147 tests). `npm run typecheck`, `npm run lint`, `npm run format:check`, and `npm run build` passed; `dist/server.js` exists.
 - After the full test run, `docker compose exec db psql -U inventory -d inventory_dev -c "select count(*) from vehicles;"` returned 14. `rg` found no `NOW()` or `CURRENT_DATE` in `src`.
 - For R11, `npm run db:seed` completed with 14 vehicles; `npm run dev` served `curl.exe -sS -i "http://127.0.0.1:3000/api/vehicles?aging=true"` with HTTP 200, `totalItems: 6`, and `asOfDate: "2026-11-03"`. The test server was stopped and port 3000 is no longer listening.
+
+## 2026-11-03 — P06
+
+- Extended the repository with `findVehicleById` including dealership id and name, added `getVehicle` with the `VEHICLE_NOT_FOUND` error, and added the validated detail controller and route. The existing list logic remains unchanged.
+- Unit tests cover DTOs for ages 89, 90 and 91 and a missing repository record. Integration tests cover the complete detail shape, the strict aging boundary, list/detail DTO equality, 404/400 envelopes and request IDs, and absence of Prisma/stack text.
+- `docker compose up -d --wait` passed. `npm run test:unit` passed (135 tests), `npm run test:integration` passed (21 tests), and `npm test` passed (156 tests). `npm run typecheck`, `npm run lint`, and `npm run format:check` passed.
+- With `npm run dev`, the seeded ID `b0000000-0000-4000-8000-000000000008` returned 200 with age 90 and `isAgingStock: false`; the specified unknown UUID returned 404 `VEHICLE_NOT_FOUND`; `abc` returned 400 `VALIDATION_ERROR`. The server was stopped after the checks.

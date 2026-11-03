@@ -17,8 +17,9 @@ const clock: Clock = { now: () => new Date(fixedNow) };
 
 function createRepository(total = 0, items: VehicleRecord[] = []) {
   const findVehicles = vi.fn<VehicleRepository["findVehicles"]>(async () => ({ items, total }));
-  const repository: VehicleRepository = { findVehicles };
-  return { repository, findVehicles };
+  const findVehicleById = vi.fn<VehicleRepository["findVehicleById"]>(async () => null);
+  const repository: VehicleRepository = { findVehicles, findVehicleById };
+  return { repository, findVehicles, findVehicleById };
 }
 
 function listQuery(query: Record<string, string>) {
@@ -141,5 +142,32 @@ describe("toVehicleDto", () => {
     const dto = toVehicleDto(record, fixedNow);
 
     expect(dto.actionUpdatedAt).toBe("2026-10-28T15:04:05.000Z");
+  });
+});
+
+describe("vehicle detail service", () => {
+  test.each([89, 90, 91])("maps a vehicle aged %i days", async (ageInDays) => {
+    const record = vehicleAtAge(ageInDays);
+    const { repository, findVehicleById } = createRepository();
+    findVehicleById.mockResolvedValue(record);
+    const service = createVehicleService({ repository, clock });
+
+    await expect(service.getVehicle(record.id)).resolves.toMatchObject({
+      id: record.id,
+      ageInDays,
+      isAgingStock: ageInDays > 90,
+    });
+    expect(findVehicleById).toHaveBeenCalledWith(record.id);
+  });
+
+  test("throws VEHICLE_NOT_FOUND when the repository returns null", async () => {
+    const { repository } = createRepository();
+    const service = createVehicleService({ repository, clock });
+
+    await expect(service.getVehicle("missing-id")).rejects.toMatchObject({
+      code: "VEHICLE_NOT_FOUND",
+      status: 404,
+      message: "Vehicle missing-id was not found.",
+    });
   });
 });

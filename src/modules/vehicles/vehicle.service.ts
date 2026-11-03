@@ -7,6 +7,7 @@ import type { Clock } from "../../shared/clock.ts";
 import type { ListVehiclesQuery } from "./vehicle.schemas.ts";
 import type { VehicleRepository } from "./vehicle.repository.ts";
 import { toVehicleDto } from "./vehicle.mapper.ts";
+import { NotFoundError } from "../../shared/errors.ts";
 
 export function createVehicleService(dependencies: {
   repository: VehicleRepository;
@@ -54,6 +55,14 @@ export function createVehicleService(dependencies: {
           agingThresholdDays: AGING_THRESHOLD_DAYS,
         },
       };
+    },
+    async getVehicle(id: string) {
+      const record = await dependencies.repository.findVehicleById(id);
+      if (!record) {
+        throw new NotFoundError("VEHICLE_NOT_FOUND", `Vehicle ${id} was not found.`);
+      }
+
+      return toVehicleDto(record, dependencies.clock.now());
     },
   };
 }

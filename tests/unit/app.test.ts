@@ -19,6 +19,7 @@ function createTestApp(query?: () => Promise<unknown>) {
   const logger = createLoggerMock();
   const vehicleRepository: VehicleRepository = {
     findVehicles: vi.fn(async () => ({ items: [], total: 0 })),
+    findVehicleById: vi.fn(async () => null),
   };
   const app = createApp({
     prisma: createPrismaStub(query),
