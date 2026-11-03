@@ -282,34 +282,67 @@ The package manifest uses major-scoped semver ranges for dependencies and
 
 ## AI Collaboration Narrative
 
-Complete this narrative yourself from the factual entries in
-[docs/ai-collaboration-log.md](docs/ai-collaboration-log.md). Do not treat
-these prompts as claims about your experience.
-
 ### How AI was used
 
-- **Planning:** Which planning work did AI assist with? `TODO(user): Describe your own experience.`
-- **Implementation:** Which implementation tasks did AI assist with? `TODO(user): Describe your own experience.`
-- **Testing:** How did AI contribute to test design or execution? `TODO(user): Describe your own experience.`
-- **Debugging:** Which debugging work, if any, involved AI? `TODO(user): Describe your own experience.`
-- **Refinement:** How did you refine the result? `TODO(user): Describe your own experience.`
+I got the design and 11-prompt implementation plan as a PDF from Claude. I
+gave that PDF to ChatGPT, which turned it into a starter pack for GitHub
+Copilot: `AGENTS.md`, a master prompt, 11 prompt files, and supporting
+documentation. The pack's
+[notes](docs/ai-workflow/PACKAGE-NOTES.md) describe changes made while
+transferring the plan, including repairs to PDF-extracted text.
+
+I ran P01 through P11 with GitHub Copilot in VS Code Agent mode on
+`feature/copilot-build`, then used a cleanup and refactor prompt for P12. I
+used the default Agent mode model; I do not have a model name to report.
+Copilot produced the implementation, tests, and project documentation in the
+checkpoint commits. I did not hand-edit files.
+
+The prompts included unit and integration test work, boundary tests, mutation
+checks, coverage, and build gates. The collaboration log records those
+checkpoint results. I did not personally run or watch the listed tests,
+curl/Postman requests, mutation check, build/start, or clean-clone run. I
+mostly read the final results rather than the diffs. The P07 and P09 log
+entries record test/command retries during agent work; I did not personally
+encounter those problems, and I did not notice a separate AI error.
+
+P12 was a cleanup and refactor pass. Its commits moved workflow references,
+removed two empty placeholders and four unreferenced schema types, and fixed
+a date-format typo in the design brief. It did not change product behavior.
 
 ### How I verified generated code
 
-- What did you inspect or run before accepting generated work? `TODO(user): Answer with your own verification process.`
-- Which checks most influenced your confidence? `TODO(user): Name the checks and why.`
+I did not personally run or watch verification during this work, so I do not
+present the checkpoint results as my own runs. The checkpoint log records the
+commands and outcomes for each phase. On 2026-11-03, `npm run check` was
+re-run in this workspace: formatting, lint, typecheck, 12 test files with
+186 tests, and the build passed. That is a current workspace result, not a
+claim that I ran it myself. I still need to review the implementation and
+understand the parts I plan to maintain.
 
 ### Meaningful decisions and corrections
 
-- Decision/correction 1 — [P01 log row](docs/ai-collaboration-log.md#2026-11-03--p01): `TODO(user): What was the decision or correction, and why?`
-- Decision/correction 2 — [P08 log row](docs/ai-collaboration-log.md#2026-11-03--p08): `TODO(user): What was the decision or correction, and why?`
-- Decision/correction 3 — [P09 log row](docs/ai-collaboration-log.md#2026-11-03--p09): `TODO(user): What was the decision or correction, and why?`
+I did not notice an AI error or identify a broader scope or trade-off
+decision. The earlier log records my setup choices for the sample database
+URLs. The repository also records changes made during the work; these are not
+claims that I directed or noticed them at the time.
+
+| Repository-recorded change                                                                                     | Evidence                                                                                              |
+| -------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| The starter pack adapted the source plan and records repairs to extracted schema and URL text.                 | [docs/ai-workflow/PACKAGE-NOTES.md](docs/ai-workflow/PACKAGE-NOTES.md); starter-pack commit `f69af97` |
+| P11 updated the README clone branch and corrected age-filter descriptions in the OpenAPI and design documents. | P11 commit `5d460c4`; P11 section in [`docs/ai-collaboration-log.md`](docs/ai-collaboration-log.md)   |
+| P12 corrected the design-brief date format and removed four unused schema type exports.                        | Commits `7fdd3d4` and `a6ad94c`                                                                       |
 
 ### How I retained ownership of the final implementation
 
-- What did you personally review, change, or approve? `TODO(user): Describe only what you did.`
-- Which parts do you understand well enough to explain or maintain? `TODO(user): Describe your own understanding.`
+I did not make hand edits, and I mostly read final results rather than diffs.
+I cannot claim a level of code review that I did not do. The repository
+contains the API, database, test, and documentation checkpoints, but I need
+to review those details myself before saying which parts I can maintain. I
+am responsible for the project I submit, including understanding and checking
+the implementation.
 
 ### What I would do differently
 
-- What would you change about your process or use of AI next time? `TODO(user): Answer from your own perspective.`
+`TODO(user): What would you change about your process or use of AI next time?`
+
+Note: this section was drafted with AI assistance from my commit history, prompt log and my own answers.

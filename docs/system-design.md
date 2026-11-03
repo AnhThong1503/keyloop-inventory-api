@@ -329,10 +329,22 @@ implemented.
 
 ## AI assistance during the design phase
 
-Complete this section yourself. It is intentionally a prompt structure, not a
-claim about who made a design choice.
+I got the design and 11-prompt plan as a PDF from Claude. I gave it to
+ChatGPT, which converted it into the Copilot starter pack: `AGENTS.md`, a
+master prompt, 11 prompt files, and supporting documentation. The pack's
+notes record adaptations, including reflowed Prisma schema text and repaired
+split or malformed values.
 
-- **Planning:** `TODO(user): Which design/planning tasks did you use AI for, if any?`
-- **Design decisions:** `TODO(user): Which decisions were yours, and what evidence informed them?`
-- **Review and changes:** `TODO(user): What did you correct, reject, or retain after review?`
-- **Ownership:** `TODO(user): How do you understand and take responsibility for this design?`
+I then used GitHub Copilot in VS Code Agent mode for P01–P11 on
+`feature/copilot-build`, followed by the P12 cleanup and refactor prompt.
+I followed the assumptions supplied with the plan. The checked-in brief does
+not enumerate A1–A15, so I cannot provide a numbered crosswalk from the
+repository alone. I did not make hand edits or identify separate scope or
+trade-off decisions in my answers.
+
+This account distinguishes the design and plan, the starter-pack conversion,
+and the implementation work. The commit history and collaboration log show
+the files changed and the checks recorded for each checkpoint. I mostly read
+the final results and did not personally run or watch those checks. I remain
+responsible for reviewing the design and implementation and understanding
+the choices before I present or maintain the service.

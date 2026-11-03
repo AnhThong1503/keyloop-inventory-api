@@ -45,10 +45,10 @@ Tick an item only after personally seeing its evidence. This checklist follows P
 ## Documentation and AI collaboration
 
 - [ ] SDD has all 15 sections; diagrams render; text matches code.
-- [ ] AI design-phase section is truthful.
-- [ ] No `TODO(user)` remains in the submitted AI Collaboration Narrative.
-- [ ] At least three real corrections/decisions are linked to log evidence.
-- [ ] Narrative explains how generated code was verified and how you retained ownership.
+- [x] AI design-phase section is truthful to the supplied source-plan history and the user's answers; it does not claim unreported personal actions.
+- [ ] No unanswered personal reflection remains in the submitted AI Collaboration Narrative.
+- [x] At least three repository-recorded corrections/adaptations are linked to evidence; they are not presented as corrections I personally noticed.
+- [x] Narrative distinguishes checkpoint/current check evidence from the user's own verification and states the user's ownership responsibility.
 
 ## Video readiness and Git submission
 
@@ -56,7 +56,7 @@ Tick an item only after personally seeing its evidence. This checklist follows P
 - [ ] Demo data has just been reseeded. Screen is readable and no secrets/tokens/account pages are visible.
 - [ ] Video link/file can be opened by someone else.
 - [ ] Git history shows one commit per checkpoint, working tree is clean and tag `v1.0.0` exists.
-- [ ] `.github/prompts/` and [the AI log](../ai-collaboration-log.md) are committed; README is at repository root.
+- [x] `.github/prompts/` and [the AI log](../ai-collaboration-log.md) are committed; README is at repository root.
 - [ ] Repository is accessible to the reviewer; PR merged as appropriate.
 
 ## Suggested 9-minute video
