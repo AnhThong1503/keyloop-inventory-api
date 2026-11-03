@@ -75,6 +75,9 @@ flowchart LR
   Client["HTTP client"] --> Server["src/server.ts"]
   Server --> App["src/app.ts<br/>Express app factory"]
   App --> Middleware["Helmet, request ID,<br/>JSON parser, request logger"]
+  Client --> Scalar["Scalar API reference<br/>/docs"]
+  Scalar --> OpenAPI["docs/openapi.yaml<br/>served at /openapi.yaml"]
+  Scalar --> VehicleRoutes
   Middleware --> VehicleRoutes["Vehicle routes"]
   VehicleRoutes --> Zod["Zod request schemas"]
   Zod --> Controller["Vehicle controllers"]
@@ -91,20 +94,21 @@ flowchart LR
 
 ## Component responsibilities
 
-| Component                                                       | Responsibility                                                                                                    |
-| --------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| `src/server.ts`                                                 | Loads validated environment settings, creates logger/Prisma/system clock, listens, and handles graceful shutdown. |
-| `src/app.ts`                                                    | Builds the Express application and middleware/router/error-handler chain; does not listen.                        |
-| `src/modules/vehicles/vehicle.routes.ts`                        | Maps list, detail, and action routes to controllers.                                                              |
-| `src/modules/vehicles/vehicle.schemas.ts` and shared validation | Validates strict query, UUID parameter, and action-body inputs with Zod.                                          |
-| `src/modules/vehicles/vehicle.controller.ts`                    | Validates requests, invokes service operations, and writes HTTP responses.                                        |
-| `src/modules/vehicles/vehicle.service.ts`                       | Applies age filtering, coordinates the clock and repository, maps not-found cases, and builds list metadata.      |
-| `src/modules/vehicles/domain/inventory-age.ts`                  | Implements UTC-day age, the `> 90` rule, age-range resolution, and inventory-date bounds without I/O.             |
-| `src/modules/vehicles/vehicle.repository.ts`                    | Translates service filters to Prisma operations and loads dealership fields.                                      |
-| `src/modules/vehicles/vehicle.mapper.ts`                        | Derives response age/status and maps database records into API vehicle DTOs.                                      |
-| Health router                                                   | Runs `SELECT 1` with a two-second timeout and returns healthy/degraded status.                                    |
-| Shared middleware                                               | Provides request IDs, structured request logging, error mapping, and common error types.                          |
-| Prisma schema/migrations/seed                                   | Define the PostgreSQL data model, schema changes, and repeatable demo records.                                    |
+| Component                                                       | Responsibility                                                                                                                         |
+| --------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/server.ts`                                                 | Loads validated environment settings, creates logger/Prisma/system clock, listens, and handles graceful shutdown.                      |
+| `src/app.ts`                                                    | Builds the Express application and middleware/router/error-handler chain, serves the OpenAPI YAML, and mounts Scalar; does not listen. |
+| Scalar API reference                                            | Presents the contract from `docs/openapi.yaml` at `/docs`; its built-in client uses the server configured in that document.            |
+| `src/modules/vehicles/vehicle.routes.ts`                        | Maps list, detail, and action routes to controllers.                                                                                   |
+| `src/modules/vehicles/vehicle.schemas.ts` and shared validation | Validates strict query, UUID parameter, and action-body inputs with Zod.                                                               |
+| `src/modules/vehicles/vehicle.controller.ts`                    | Validates requests, invokes service operations, and writes HTTP responses.                                                             |
+| `src/modules/vehicles/vehicle.service.ts`                       | Applies age filtering, coordinates the clock and repository, maps not-found cases, and builds list metadata.                           |
+| `src/modules/vehicles/domain/inventory-age.ts`                  | Implements UTC-day age, the `> 90` rule, age-range resolution, and inventory-date bounds without I/O.                                  |
+| `src/modules/vehicles/vehicle.repository.ts`                    | Translates service filters to Prisma operations and loads dealership fields.                                                           |
+| `src/modules/vehicles/vehicle.mapper.ts`                        | Derives response age/status and maps database records into API vehicle DTOs.                                                           |
+| Health router                                                   | Runs `SELECT 1` with a two-second timeout and returns healthy/degraded status.                                                         |
+| Shared middleware                                               | Provides request IDs, structured request logging, error mapping, and common error types.                                               |
+| Prisma schema/migrations/seed                                   | Define the PostgreSQL data model, schema changes, and repeatable demo records.                                                         |
 
 ## Data model
 

@@ -1,5 +1,8 @@
+import { randomBytes } from "node:crypto";
+import { readFile } from "node:fs/promises";
 import express from "express";
 import helmet from "helmet";
+import { apiReference } from "@scalar/express-api-reference";
 import type pino from "pino";
 import { createHealthRouter, type HealthPrismaClient } from "./modules/health/health.routes.ts";
 import {
@@ -19,6 +22,18 @@ export interface AppDependencies {
   clock: Clock;
   logger: pino.Logger;
   vehicleRepository?: VehicleRepository;
+}
+
+const defaultSecurityHeaders = helmet();
+function documentationSecurityHeaders(nonce: string) {
+  return helmet({
+    contentSecurityPolicy: {
+      directives: {
+        scriptSrc: ["'self'", "https://cdn.jsdelivr.net", `'nonce-${nonce}'`],
+        styleSrc: ["'self'", "'unsafe-inline'"],
+      },
+    },
+  });
 }
 
 function isVehicleDatabase(
@@ -59,12 +74,41 @@ export function createApp({
   });
 
   app.disable("x-powered-by");
-  app.use(helmet());
+  app.use((request, response, next) => {
+    if (request.path !== "/docs" && request.path !== "/docs/") {
+      defaultSecurityHeaders(request, response, next);
+      return;
+    }
+
+    const nonce = randomBytes(16).toString("base64");
+    response.locals.scalarCspNonce = nonce;
+    documentationSecurityHeaders(nonce)(request, response, next);
+  });
   app.use(requestIdMiddleware);
   app.use(express.json({ limit: "10kb" }));
   app.use(requestLogger(logger));
   app.use("/health", createHealthRouter({ prisma, clock }));
   app.use("/api", createVehicleRouter({ service: vehicleService }));
+  app.get("/openapi.yaml", async (_request, response) => {
+    const specification = await readFile(new URL("../docs/openapi.yaml", import.meta.url), "utf8");
+    response.type("application/yaml").send(specification);
+  });
+  app.get(["/docs", "/docs/"], (request, response, next) => {
+    const nonce = response.locals.scalarCspNonce;
+    if (typeof nonce !== "string") {
+      next(new Error("Scalar CSP nonce is unavailable."));
+      return;
+    }
+
+    const scalarHandler = apiReference({
+      url: "/openapi.yaml",
+      theme: "purple",
+      nonce,
+    });
+
+    // Scalar's handler typing excludes Express's normal route-parameter type.
+    scalarHandler(request as never, response, next);
+  });
   app.use(notFoundHandler);
   app.use(errorHandler(logger));
 

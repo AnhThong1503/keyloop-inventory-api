@@ -3,6 +3,9 @@
 Start the local databases, reseed the development database, and run the API
 from the repository root:
 
+[Interactive API documentation](http://127.0.0.1:3000/docs) is available when
+the local API server is running.
+
 ```powershell
 docker compose up -d --wait
 npm run db:seed

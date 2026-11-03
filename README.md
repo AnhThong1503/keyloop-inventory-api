@@ -67,6 +67,29 @@ curl.exe -i http://127.0.0.1:3000/health
 A healthy response is HTTP 200 with `status: "ok"` and
 `checks.database: "up"`.
 
+## Interactive API Documentation
+
+Start the backend and open [http://127.0.0.1:3000/docs](http://127.0.0.1:3000/docs).
+For a local setup, run the database and seed commands from the repository root,
+then start the development server:
+
+```powershell
+docker compose up -d --wait
+npm run db:deploy
+npm run db:seed
+npm run dev
+```
+
+Scalar groups the documented endpoints by tag. Expand an operation to inspect
+its parameters, request body, response schemas, status codes, and examples.
+Use the built-in API client to send requests to the local development server
+declared in the OpenAPI document.
+
+The reference loads the existing
+[OpenAPI YAML file](docs/openapi.yaml), which is also available at
+[http://127.0.0.1:3000/openapi.yaml](http://127.0.0.1:3000/openapi.yaml).
+It is the single source of truth for the displayed API contract.
+
 ## Environment variables
 
 The app loads `.env` with dotenv and validates its configuration at startup.
