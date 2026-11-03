@@ -1,0 +1,702 @@
+openapi: 3.1.0
+info:
+  title: Keyloop Inventory API
+  version: 1.0.0
+  description: >-
+    REST API for listing dealership inventory and recording proposed vehicle
+    actions. A vehicle is aging only when its ageInDays is strictly more than
+    90; age and aging status are derived from the UTC inventory date and are
+    not stored.
+servers:
+  - url: http://127.0.0.1:3000
+    description: Local development server
+security: []
+tags:
+  - name: Vehicles
+    description: Inventory lookup and proposed-action operations
+  - name: Health
+    description: Service health checks
+paths:
+  /api/vehicles:
+    get:
+      operationId: listVehicles
+      tags:
+        - Vehicles
+      summary: List and filter vehicles
+      description: >-
+        Filters are combined with AND. Make and model are trimmed,
+        case-insensitive exact matches. Age bounds are inclusive. aging=true
+        means ageInDays is at least 91; aging=false means ageInDays is at most
+        90. minAgeDays greater than maxAgeDays is invalid and returns 400.
+        Otherwise valid filters that combine to an empty range, such as
+        aging=true with maxAgeDays=90, return an empty list. Results are
+        ordered by inventoryDate ascending, then id ascending.
+      parameters:
+        - $ref: "#/components/parameters/Make"
+        - $ref: "#/components/parameters/Model"
+        - $ref: "#/components/parameters/DealershipId"
+        - $ref: "#/components/parameters/Aging"
+        - $ref: "#/components/parameters/MinAgeDays"
+        - $ref: "#/components/parameters/MaxAgeDays"
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/PageSize"
+        - $ref: "#/components/parameters/RequestId"
+      responses:
+        "200":
+          description: The matching page of vehicles and result metadata.
+          headers:
+            x-request-id:
+              $ref: "#/components/headers/RequestId"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VehicleListResponse"
+              examples:
+                ageBoundaries:
+                  summary: Seeded 89-, 90-, and 91-day vehicles
+                  value:
+                    data:
+                      - id: b0000000-0000-4000-8000-000000000009
+                        vin: KLP2026A000000009
+                        make: Honda
+                        model: CR-V
+                        year: 2022
+                        colour: Silver
+                        inventoryDate: "2026-07-30"
+                        ageInDays: 91
+                        isAgingStock: true
+                        proposedAction: UNDER_REVIEW
+                        actionNote: null
+                        actionUpdatedAt: "2026-10-29T12:00:00.000Z"
+                        dealership:
+                          id: a0000000-0000-4000-8000-000000000001
+                          name: Downtown Motors
+                      - id: b0000000-0000-4000-8000-000000000008
+                        vin: KLP2026A000000008
+                        make: Honda
+                        model: Civic
+                        year: 2022
+                        colour: Rallye Red
+                        inventoryDate: "2026-07-31"
+                        ageInDays: 90
+                        isAgingStock: false
+                        proposedAction: NONE
+                        actionNote: null
+                        actionUpdatedAt: null
+                        dealership:
+                          id: a0000000-0000-4000-8000-000000000001
+                          name: Downtown Motors
+                      - id: b0000000-0000-4000-8000-000000000007
+                        vin: KLP2026A000000007
+                        make: Toyota
+                        model: RAV4
+                        year: 2023
+                        colour: Midnight Blue
+                        inventoryDate: "2026-08-01"
+                        ageInDays: 89
+                        isAgingStock: false
+                        proposedAction: NONE
+                        actionNote: null
+                        actionUpdatedAt: null
+                        dealership:
+                          id: a0000000-0000-4000-8000-000000000001
+                          name: Downtown Motors
+                    meta:
+                      page: 1
+                      pageSize: 20
+                      totalItems: 3
+                      totalPages: 1
+                      asOfDate: "2026-10-29"
+                      agingThresholdDays: 90
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "413":
+          $ref: "#/components/responses/PayloadTooLarge"
+        "500":
+          $ref: "#/components/responses/InternalError"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+  /api/vehicles/{id}:
+    get:
+      operationId: getVehicle
+      tags:
+        - Vehicles
+      summary: Get a vehicle by ID
+      parameters:
+        - $ref: "#/components/parameters/VehicleId"
+        - $ref: "#/components/parameters/RequestId"
+      responses:
+        "200":
+          description: The vehicle and its dealership.
+          headers:
+            x-request-id:
+              $ref: "#/components/headers/RequestId"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VehicleResponse"
+              example:
+                data:
+                  id: b0000000-0000-4000-8000-000000000009
+                  vin: KLP2026A000000009
+                  make: Honda
+                  model: CR-V
+                  year: 2022
+                  colour: Silver
+                  inventoryDate: "2026-07-30"
+                  ageInDays: 91
+                  isAgingStock: true
+                  proposedAction: UNDER_REVIEW
+                  actionNote: null
+                  actionUpdatedAt: "2026-10-29T12:00:00.000Z"
+                  dealership:
+                    id: a0000000-0000-4000-8000-000000000001
+                    name: Downtown Motors
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/VehicleNotFound"
+        "413":
+          $ref: "#/components/responses/PayloadTooLarge"
+        "500":
+          $ref: "#/components/responses/InternalError"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+  /api/vehicles/{id}/action:
+    patch:
+      operationId: updateVehicleAction
+      tags:
+        - Vehicles
+      summary: Replace a vehicle's proposed action
+      description: >-
+        Replaces the action state. An omitted, null, or blank note clears the
+        saved note. The server sets actionUpdatedAt from its clock; actions are
+        permitted for vehicles of any age.
+      parameters:
+        - $ref: "#/components/parameters/VehicleId"
+        - $ref: "#/components/parameters/RequestId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateActionRequest"
+            example:
+              action: PRICE_REDUCTION_PLANNED
+              note: Reduce asking price by 5% from Monday
+      responses:
+        "200":
+          description: The updated vehicle.
+          headers:
+            x-request-id:
+              $ref: "#/components/headers/RequestId"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VehicleResponse"
+              example:
+                data:
+                  id: b0000000-0000-4000-8000-000000000009
+                  vin: KLP2026A000000009
+                  make: Honda
+                  model: CR-V
+                  year: 2022
+                  colour: Silver
+                  inventoryDate: "2026-07-30"
+                  ageInDays: 91
+                  isAgingStock: true
+                  proposedAction: PRICE_REDUCTION_PLANNED
+                  actionNote: Reduce asking price by 5% from Monday
+                  actionUpdatedAt: "2026-10-29T12:00:00.000Z"
+                  dealership:
+                    id: a0000000-0000-4000-8000-000000000001
+                    name: Downtown Motors
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/VehicleNotFound"
+        "413":
+          $ref: "#/components/responses/PayloadTooLarge"
+        "500":
+          $ref: "#/components/responses/InternalError"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+  /health:
+    get:
+      operationId: getHealth
+      tags:
+        - Health
+      summary: Check service and database health
+      parameters:
+        - $ref: "#/components/parameters/RequestId"
+      responses:
+        "200":
+          description: The API and database are available.
+          headers:
+            x-request-id:
+              $ref: "#/components/headers/RequestId"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthResponse"
+              example:
+                status: ok
+                checks:
+                  database: up
+                uptimeSeconds: 412.5
+                timestamp: "2026-10-29T12:00:00.000Z"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "413":
+          $ref: "#/components/responses/PayloadTooLarge"
+        "503":
+          description: The database health query failed or timed out.
+          headers:
+            x-request-id:
+              $ref: "#/components/headers/RequestId"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthResponse"
+              example:
+                status: degraded
+                checks:
+                  database: down
+                uptimeSeconds: 412.5
+                timestamp: "2026-10-29T12:00:00.000Z"
+components:
+  parameters:
+    Make:
+      name: make
+      in: query
+      required: false
+      description: Optional. No default. Trimmed, case-insensitive exact match.
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 50
+      example: Toyota
+    Model:
+      name: model
+      in: query
+      required: false
+      description: Optional. No default. Trimmed, case-insensitive exact match.
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 50
+      example: RAV4
+    DealershipId:
+      name: dealershipId
+      in: query
+      required: false
+      description: Optional dealership UUID filter. No default.
+      schema:
+        type: string
+        format: uuid
+      example: a0000000-0000-4000-8000-000000000001
+    Aging:
+      name: aging
+      in: query
+      required: false
+      description: >-
+        Optional. No default. "true" selects ageInDays >= 91; "false" selects
+        ageInDays <= 90.
+      schema:
+        type: string
+        enum:
+          - "true"
+          - "false"
+      example: "true"
+    MinAgeDays:
+      name: minAgeDays
+      in: query
+      required: false
+      description: Optional inclusive minimum age in days. No default.
+      schema:
+        type: integer
+        minimum: 0
+        maximum: 36500
+      example: 89
+    MaxAgeDays:
+      name: maxAgeDays
+      in: query
+      required: false
+      description: Optional inclusive maximum age in days. No default.
+      schema:
+        type: integer
+        minimum: 0
+        maximum: 36500
+      example: 91
+    Page:
+      name: page
+      in: query
+      required: false
+      description: Page number; defaults to 1. No maximum is imposed.
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+      example: 1
+    PageSize:
+      name: pageSize
+      in: query
+      required: false
+      description: Number of items per page; defaults to 20.
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+      example: 20
+    VehicleId:
+      name: id
+      in: path
+      required: true
+      description: Vehicle UUID.
+      schema:
+        type: string
+        format: uuid
+      example: b0000000-0000-4000-8000-000000000009
+    RequestId:
+      name: x-request-id
+      in: header
+      required: false
+      description: >-
+        Optional request ID. Valid values contain 1-64 letters, digits, dots,
+        underscores, or hyphens; absent or invalid values are replaced with a
+        generated UUID.
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 64
+        pattern: "^[A-Za-z0-9._-]{1,64}$"
+      example: request-123
+  headers:
+    RequestId:
+      description: The echoed valid request ID or a generated UUID.
+      schema:
+        type: string
+      example: request-123
+  schemas:
+    ProposedAction:
+      type: string
+      description: Proposed action recorded for a vehicle.
+      enum:
+        - NONE
+        - UNDER_REVIEW
+        - PRICE_REDUCTION_PLANNED
+        - PROMOTION_PLANNED
+        - TRANSFER_PLANNED
+        - WHOLESALE_PLANNED
+    Vehicle:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - vin
+        - make
+        - model
+        - year
+        - colour
+        - inventoryDate
+        - ageInDays
+        - isAgingStock
+        - proposedAction
+        - actionNote
+        - actionUpdatedAt
+        - dealership
+      properties:
+        id:
+          type: string
+          format: uuid
+        vin:
+          type: string
+          minLength: 1
+          maxLength: 17
+        make:
+          type: string
+          maxLength: 50
+        model:
+          type: string
+          maxLength: 50
+        year:
+          type: integer
+        colour:
+          type: string
+          maxLength: 30
+        inventoryDate:
+          type: string
+          format: date
+        ageInDays:
+          type: integer
+          minimum: 0
+          description: Whole UTC calendar days from inventoryDate to asOfDate.
+        isAgingStock:
+          type: boolean
+          description: True only when ageInDays is strictly greater than 90.
+        proposedAction:
+          $ref: "#/components/schemas/ProposedAction"
+        actionNote:
+          type:
+            - string
+            - "null"
+          maxLength: 500
+        actionUpdatedAt:
+          type:
+            - string
+            - "null"
+          format: date-time
+        dealership:
+          type: object
+          additionalProperties: false
+          required:
+            - id
+            - name
+          properties:
+            id:
+              type: string
+              format: uuid
+            name:
+              type: string
+              maxLength: 100
+    VehicleListResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - data
+        - meta
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/Vehicle"
+        meta:
+          $ref: "#/components/schemas/ListMeta"
+    VehicleResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - data
+      properties:
+        data:
+          $ref: "#/components/schemas/Vehicle"
+    ListMeta:
+      type: object
+      additionalProperties: false
+      required:
+        - page
+        - pageSize
+        - totalItems
+        - totalPages
+        - asOfDate
+        - agingThresholdDays
+      properties:
+        page:
+          type: integer
+          minimum: 1
+        pageSize:
+          type: integer
+          minimum: 1
+          maximum: 100
+        totalItems:
+          type: integer
+          minimum: 0
+        totalPages:
+          type: integer
+          minimum: 0
+        asOfDate:
+          type: string
+          format: date
+        agingThresholdDays:
+          type: integer
+          const: 90
+    UpdateActionRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - action
+      properties:
+        action:
+          $ref: "#/components/schemas/ProposedAction"
+        note:
+          type:
+            - string
+            - "null"
+          maxLength: 500
+          description: Optional; omitted, null, or blank values clear the note.
+    ErrorDetail:
+      type: object
+      additionalProperties: false
+      required:
+        - location
+        - path
+        - message
+      properties:
+        location:
+          type: string
+          enum:
+            - query
+            - params
+            - body
+        path:
+          type: string
+        message:
+          type: string
+    ErrorEnvelope:
+      type: object
+      additionalProperties: false
+      description: Standard error response. ROUTE_NOT_FOUND is used for an unmatched URL.
+      required:
+        - error
+      properties:
+        error:
+          type: object
+          additionalProperties: false
+          required:
+            - code
+            - message
+            - requestId
+          properties:
+            code:
+              type: string
+              description: >-
+                ROUTE_NOT_FOUND is used by the fallback for paths not declared
+                in this document.
+              enum:
+                - VALIDATION_ERROR
+                - INVALID_JSON
+                - VEHICLE_NOT_FOUND
+                - ROUTE_NOT_FOUND
+                - PAYLOAD_TOO_LARGE
+                - SERVICE_UNAVAILABLE
+                - INTERNAL_ERROR
+            message:
+              type: string
+            details:
+              type: array
+              items:
+                $ref: "#/components/schemas/ErrorDetail"
+            requestId:
+              type: string
+      example:
+        error:
+          code: ROUTE_NOT_FOUND
+          message: Route not found
+          requestId: openapi-route-not-found
+    HealthResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - status
+        - checks
+        - uptimeSeconds
+        - timestamp
+      properties:
+        status:
+          type: string
+          enum:
+            - ok
+            - degraded
+        checks:
+          type: object
+          additionalProperties: false
+          required:
+            - database
+          properties:
+            database:
+              type: string
+              enum:
+                - up
+                - down
+        uptimeSeconds:
+          type: number
+          minimum: 0
+        timestamp:
+          type: string
+          format: date-time
+  responses:
+    BadRequest:
+      description: The request is invalid or contains malformed JSON.
+      headers:
+        x-request-id:
+          $ref: "#/components/headers/RequestId"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorEnvelope"
+          examples:
+            validationError:
+              summary: Query validation failed
+              value:
+                error:
+                  code: VALIDATION_ERROR
+                  message: Request validation failed
+                  details:
+                    - location: query
+                      path: minAgeDays
+                      message: must be a whole number between 0 and 36500
+                  requestId: openapi-validation
+            invalidJson:
+              summary: Malformed JSON body
+              value:
+                error:
+                  code: INVALID_JSON
+                  message: Request body contains invalid JSON
+                  requestId: openapi-invalid-json
+    VehicleNotFound:
+      description: No vehicle exists with the supplied UUID.
+      headers:
+        x-request-id:
+          $ref: "#/components/headers/RequestId"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorEnvelope"
+          example:
+            error:
+              code: VEHICLE_NOT_FOUND
+              message: Vehicle 9f1c2b7e-3d4a-4b6c-8e5f-1a2b3c4d5e6f was not found.
+              requestId: openapi-not-found
+    PayloadTooLarge:
+      description: The JSON request body exceeds the 10 KB parser limit.
+      headers:
+        x-request-id:
+          $ref: "#/components/headers/RequestId"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorEnvelope"
+          example:
+            error:
+              code: PAYLOAD_TOO_LARGE
+              message: Request body exceeds the 10kb limit
+              requestId: openapi-too-large
+    InternalError:
+      description: An unexpected server or repository error occurred.
+      headers:
+        x-request-id:
+          $ref: "#/components/headers/RequestId"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorEnvelope"
+          example:
+            error:
+              code: INTERNAL_ERROR
+              message: Internal server error
+              requestId: openapi-internal
+    ServiceUnavailable:
+      description: A recognized database connectivity failure occurred.
+      headers:
+        x-request-id:
+          $ref: "#/components/headers/RequestId"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorEnvelope"
+          example:
+            error:
+              code: SERVICE_UNAVAILABLE
+              message: Service unavailable
+              requestId: openapi-unavailable

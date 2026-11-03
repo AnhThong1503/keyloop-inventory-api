@@ -186,7 +186,7 @@ Expected branch: `feature/copilot-build`; `.nvmrc` contains `24`; `origin` point
 1. In this PowerShell window, from the repository root, run `code .`.
 2. In VS Code, open the Copilot Chat view.
 3. Select **Agent** (not Ask or Edit).
-4. Open `MASTER-PROMPT.md`, copy its full contents and paste them into Copilot Chat.
+4. Open [`MASTER-PROMPT.md`](./MASTER-PROMPT.md), copy its full contents and paste them into Copilot Chat.
 5. Keep approval prompts enabled initially. Approve only commands you understand and that match this repository workflow. Do not enable global “Allow all” for your whole computer.
 
 Copilot will execute P01 and continue in order. Before P02 it must pause if `.env` is not present or Docker is not ready.

@@ -4,6 +4,7 @@ You are implementing the Keyloop Scenario B backend. Follow the source plan in `
 
 ## Source of truth
 - Preserve the scope, A1–A15 assumptions, API contract, data model and acceptance criteria in the supplied plan.
+- Human setup and workflow references live in `docs/ai-workflow/`; implementation prompts remain in `.github/prompts/`.
 - Stack majors are fixed: Node 24, TypeScript 6, Express 5, Prisma 7, PostgreSQL 18, Zod 4, Vitest 4, ESLint 10, Prettier 3.
 - Read `docs/design-brief.md` before implementation. Do not add a frontend, authentication, queues, caching, Kubernetes or out-of-scope features.
 - Use UTC calendar-day arithmetic and an injected clock. Aging is `ageInDays > 90`, never persisted.

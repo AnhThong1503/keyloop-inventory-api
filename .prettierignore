@@ -1,0 +1,19 @@
+dist
+coverage
+src/generated
+prisma/migrations
+package-lock.json
+
+# Supplied source-plan and reference documents are preserved verbatim.
+.github/prompts
+AGENTS.md
+docs/ai-workflow/MASTER-PROMPT.md
+docs/ai-workflow/PACKAGE-NOTES.md
+docs/ai-workflow/PROMPT-MAP.md
+docs/ai-workflow/RESUME-PROMPT.md
+docs/ai-workflow/START-HERE.md
+docs/ai-workflow/WINDOWS-SETUP.md
+docs/ai-workflow/command-reference.md
+docs/design-brief.md
+docs/ai-workflow/final-assessment-checklist.md
+docs/ai-workflow/testing-strategy.md

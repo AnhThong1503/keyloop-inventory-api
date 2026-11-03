@@ -1,3 +1,0 @@
-# Resume prompt
-
-Read `AGENTS.md`, `MASTER-PROMPT.md`, `docs/ai-collaboration-log.md` (if present), and `git status` / `git log --oneline -12`. Identify the last fully completed prompt by its checkpoint evidence and commit. Do not repeat a completed prompt and do not assume a failed or unverified checkpoint passed. Resume with the next incomplete prompt from `.github/prompts/`, following the master orchestration prompt and root `AGENTS.md`. If the previous run stopped for a human prerequisite, tell me exactly what I must do before continuing. Never reset, clean, amend published commits or force-push.
