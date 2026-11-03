@@ -144,6 +144,17 @@ describe("toVehicleDto", () => {
     expect(dto.dealership).toEqual({ id: "dealer-1", name: "Dealer" });
   });
 
+  test("derives age and aging status from the inventory date on each read", () => {
+    const record = vehicleAtAge(90);
+    const firstRead = toVehicleDto(record, fixedNow);
+    const nextDayRead = toVehicleDto(record, new Date("2026-10-30T12:00:00.000Z"));
+
+    expect(firstRead).toMatchObject({ ageInDays: 90, isAgingStock: false });
+    expect(nextDayRead).toMatchObject({ ageInDays: 91, isAgingStock: true });
+    expect(record).not.toHaveProperty("ageInDays");
+    expect(record).not.toHaveProperty("isAgingStock");
+  });
+
   test("serializes actionUpdatedAt as ISO and does not add persistence fields", () => {
     const record = vehicleAtAge(0);
     record.actionUpdatedAt = new Date("2026-10-28T15:04:05.000Z");

@@ -12,6 +12,9 @@ export default defineConfig({
         test: {
           name: "unit",
           include: ["tests/unit/**/*.test.ts"],
+          env: {
+            TZ: process.env.TEST_TZ ?? "UTC",
+          },
         },
       },
       {
@@ -29,5 +32,14 @@ export default defineConfig({
         },
       },
     ],
+    coverage: {
+      provider: "v8",
+      include: ["src/modules/vehicles/domain/**/*.ts", "src/modules/vehicles/vehicle.service.ts"],
+      thresholds: {
+        lines: 90,
+        branches: 90,
+        perFile: true,
+      },
+    },
   },
 });

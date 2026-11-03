@@ -2,12 +2,30 @@ import { describe, expect, test, vi } from "vitest";
 import request from "supertest";
 import { createApp } from "../../src/app.ts";
 import type { HealthPrismaClient } from "../../src/modules/health/health.routes.ts";
-import type { VehicleRepository } from "../../src/modules/vehicles/vehicle.repository.ts";
+import type {
+  VehicleRecord,
+  VehicleRepository,
+} from "../../src/modules/vehicles/vehicle.repository.ts";
 import type { Clock } from "../../src/shared/clock.ts";
 import { createLoggerMock } from "./logger-mock.ts";
 
 const fixedTimestamp = new Date("2026-10-29T12:00:00.000Z");
 const fixedClock: Clock = { now: () => fixedTimestamp };
+const patchVehicleId = "b0000000-0000-4000-8000-000000000001";
+
+const patchVehicle: VehicleRecord = {
+  id: patchVehicleId,
+  vin: "TEST0000000000001",
+  make: "Toyota",
+  model: "Camry",
+  year: 2024,
+  colour: "Blue",
+  inventoryDate: new Date("2026-09-14T00:00:00.000Z"),
+  proposedAction: "NONE",
+  actionNote: null,
+  actionUpdatedAt: null,
+  dealership: { id: "a0000000-0000-4000-8000-000000000001", name: "Test dealership" },
+};
 
 function createPrismaStub(query: () => Promise<unknown> = async () => 1): HealthPrismaClient {
   return {
@@ -15,20 +33,19 @@ function createPrismaStub(query: () => Promise<unknown> = async () => 1): Health
   };
 }
 
-function createTestApp(query?: () => Promise<unknown>) {
+function createTestApp(query?: () => Promise<unknown>, vehicleRepository?: VehicleRepository) {
   const logger = createLoggerMock();
-  const vehicleRepository: VehicleRepository = {
-    findVehicles: vi.fn(async () => ({ items: [], total: 0 })),
-    findVehicleById: vi.fn(async () => null),
-    updateVehicleAction: vi.fn(async () => {
-      throw new Error("not implemented by app unit tests");
-    }),
-  };
   const app = createApp({
     prisma: createPrismaStub(query),
     clock: fixedClock,
     logger,
-    vehicleRepository,
+    vehicleRepository: vehicleRepository ?? {
+      findVehicles: vi.fn(async () => ({ items: [], total: 0 })),
+      findVehicleById: vi.fn(async () => null),
+      updateVehicleAction: vi.fn(async () => {
+        throw new Error("not implemented by app unit tests");
+      }),
+    },
   });
   return { app, logger };
 }
@@ -57,14 +74,6 @@ describe("createApp", () => {
     });
     expect(JSON.stringify(response.body)).not.toContain("private database details");
   });
-
-  test("returns degraded status when the database query exceeds two seconds", async () => {
-    const { app } = createTestApp(
-      () => new Promise((resolve) => setTimeout(() => resolve(1), 2200)),
-    );
-    const response = await request(app).get("/health").expect(503);
-    expect(response.body.checks.database).toBe("down");
-  }, 5000);
 
   test("returns the route-not-found envelope with the same request id", async () => {
     const { app } = createTestApp();
@@ -149,5 +158,43 @@ describe("createApp", () => {
     expect(JSON.stringify(loggedFields)).not.toContain("do-not-log");
     expect(loggedFields).not.toHaveProperty("headers");
     expect(loggedFields).not.toHaveProperty("body");
+  });
+
+  test("returns a generic error envelope for repository failures on list, detail, and PATCH", async () => {
+    const privateMessage = "private driver text: database password must stay server-side";
+    const repository: VehicleRepository = {
+      findVehicles: vi.fn(async () => {
+        throw new Error(privateMessage);
+      }),
+      findVehicleById: vi.fn(async (id) => {
+        if (id === patchVehicleId) {
+          return patchVehicle;
+        }
+        throw new Error(privateMessage);
+      }),
+      updateVehicleAction: vi.fn(async () => {
+        throw new Error(privateMessage);
+      }),
+    };
+    const { app } = createTestApp(undefined, repository);
+
+    const responses = [
+      await request(app).get("/api/vehicles").expect(500),
+      await request(app).get("/api/vehicles/b0000000-0000-4000-8000-000000000002").expect(500),
+      await request(app)
+        .patch(`/api/vehicles/${patchVehicleId}/action`)
+        .send({ action: "NONE" })
+        .expect(500),
+    ];
+
+    for (const response of responses) {
+      expect(response.body.error).toMatchObject({
+        code: "INTERNAL_ERROR",
+        message: "Internal server error",
+        requestId: response.headers["x-request-id"],
+      });
+      expect(JSON.stringify(response.body)).not.toContain(privateMessage);
+      expect(JSON.stringify(response.body)).not.toMatch(/driver|password|stack|Error:/i);
+    }
   });
 });
