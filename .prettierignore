@@ -1,0 +1,19 @@
+dist
+coverage
+src/generated
+prisma/migrations
+package-lock.json
+
+# Supplied source-plan and reference documents are preserved verbatim.
+.github/prompts
+AGENTS.md
+MASTER-PROMPT.md
+PACKAGE-NOTES.md
+PROMPT-MAP.md
+RESUME-PROMPT.md
+START-HERE.md
+WINDOWS-SETUP.md
+docs/command-reference.md
+docs/design-brief.md
+docs/final-assessment-checklist.md
+docs/testing-strategy.md

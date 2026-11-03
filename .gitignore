@@ -8,11 +8,11 @@ coverage/
 .env.*.local
 *.pem
 *.key
+*.log
 
 # Generated Prisma Client
 src/generated/
 
 # Logs and OS noise
-*.log
 .DS_Store
 Thumbs.db
