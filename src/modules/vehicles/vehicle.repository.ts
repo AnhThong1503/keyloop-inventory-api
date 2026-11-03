@@ -1,4 +1,5 @@
 import type { PrismaClient } from "../../generated/prisma/client.ts";
+import type { ProposedAction } from "../../generated/prisma/enums.ts";
 
 export interface FindVehiclesInput {
   make?: string;
@@ -24,12 +25,19 @@ export interface VehicleRecord {
   dealership: { id: string; name: string };
 }
 
+export interface UpdateVehicleActionInput {
+  proposedAction: ProposedAction;
+  actionNote: string | null;
+  actionUpdatedAt: Date;
+}
+
 export interface VehicleRepository {
   findVehicles(input: FindVehiclesInput): Promise<{
     items: VehicleRecord[];
     total: number;
   }>;
   findVehicleById(id: string): Promise<VehicleRecord | null>;
+  updateVehicleAction(id: string, input: UpdateVehicleActionInput): Promise<VehicleRecord>;
 }
 
 export type PrismaVehicleClient = Pick<PrismaClient, "vehicle" | "$transaction">;
@@ -67,6 +75,13 @@ export function createVehicleRepository(prisma: PrismaVehicleClient): VehicleRep
     async findVehicleById(id) {
       return prisma.vehicle.findUnique({
         where: { id },
+        include: { dealership: { select: { id: true, name: true } } },
+      });
+    },
+    async updateVehicleAction(id, input) {
+      return prisma.vehicle.update({
+        where: { id },
+        data: input,
         include: { dealership: { select: { id: true, name: true } } },
       });
     },

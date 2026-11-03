@@ -5,6 +5,7 @@ import {
 } from "./domain/inventory-age.ts";
 import type { Clock } from "../../shared/clock.ts";
 import type { ListVehiclesQuery } from "./vehicle.schemas.ts";
+import type { UpdateActionBody } from "./vehicle.schemas.ts";
 import type { VehicleRepository } from "./vehicle.repository.ts";
 import { toVehicleDto } from "./vehicle.mapper.ts";
 import { NotFoundError } from "../../shared/errors.ts";
@@ -63,6 +64,21 @@ export function createVehicleService(dependencies: {
       }
 
       return toVehicleDto(record, dependencies.clock.now());
+    },
+    async updateVehicleAction(id: string, body: UpdateActionBody) {
+      const existing = await dependencies.repository.findVehicleById(id);
+      if (!existing) {
+        throw new NotFoundError("VEHICLE_NOT_FOUND", `Vehicle ${id} was not found.`);
+      }
+
+      const now = dependencies.clock.now();
+      const updated = await dependencies.repository.updateVehicleAction(id, {
+        proposedAction: body.action,
+        actionNote: body.note ?? null,
+        actionUpdatedAt: now,
+      });
+
+      return toVehicleDto(updated, now);
     },
   };
 }

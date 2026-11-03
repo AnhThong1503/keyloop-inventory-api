@@ -10,6 +10,7 @@ import type {
 } from "../../src/modules/vehicles/vehicle.repository.ts";
 import { createVehicleService } from "../../src/modules/vehicles/vehicle.service.ts";
 import { listVehiclesQuerySchema } from "../../src/modules/vehicles/vehicle.schemas.ts";
+import { updateActionBodySchema } from "../../src/modules/vehicles/vehicle.schemas.ts";
 import type { Clock } from "../../src/shared/clock.ts";
 
 const fixedNow = new Date("2026-10-29T12:00:00.000Z");
@@ -18,8 +19,15 @@ const clock: Clock = { now: () => new Date(fixedNow) };
 function createRepository(total = 0, items: VehicleRecord[] = []) {
   const findVehicles = vi.fn<VehicleRepository["findVehicles"]>(async () => ({ items, total }));
   const findVehicleById = vi.fn<VehicleRepository["findVehicleById"]>(async () => null);
-  const repository: VehicleRepository = { findVehicles, findVehicleById };
-  return { repository, findVehicles, findVehicleById };
+  const updateVehicleAction = vi.fn<VehicleRepository["updateVehicleAction"]>(
+    async (id, input) => ({ ...vehicleAtAge(0), id, ...input }),
+  );
+  const repository: VehicleRepository = {
+    findVehicles,
+    findVehicleById,
+    updateVehicleAction,
+  };
+  return { repository, findVehicles, findVehicleById, updateVehicleAction };
 }
 
 function listQuery(query: Record<string, string>) {
@@ -168,6 +176,73 @@ describe("vehicle detail service", () => {
       code: "VEHICLE_NOT_FOUND",
       status: 404,
       message: "Vehicle missing-id was not found.",
+    });
+  });
+
+  describe("vehicle action service", () => {
+    test.each([
+      ["omitted", undefined, null],
+      ["null", null, null],
+      ["blank", "   ", null],
+      ["a note", "Reviewed by manager", "Reviewed by manager"],
+    ])(
+      "normalizes a %s note and timestamps the replacement",
+      async (_label, note, expectedNote) => {
+        const record = vehicleAtAge(45);
+        const { repository, findVehicleById, updateVehicleAction } = createRepository();
+        findVehicleById.mockResolvedValue(record);
+        updateVehicleAction.mockImplementation(async (id, input) => ({ ...record, id, ...input }));
+        const service = createVehicleService({ repository, clock });
+        const rawBody =
+          note === undefined
+            ? { action: "PROMOTION_PLANNED" }
+            : { action: "PROMOTION_PLANNED", note };
+        const body = updateActionBodySchema.parse(rawBody);
+
+        const result = await service.updateVehicleAction(record.id, body);
+
+        expect(updateVehicleAction).toHaveBeenCalledWith(record.id, {
+          proposedAction: "PROMOTION_PLANNED",
+          actionNote: expectedNote,
+          actionUpdatedAt: fixedNow,
+        });
+        expect(result).toMatchObject({
+          id: record.id,
+          ageInDays: 45,
+          isAgingStock: false,
+          proposedAction: "PROMOTION_PLANNED",
+          actionNote: expectedNote,
+          actionUpdatedAt: fixedNow.toISOString(),
+        });
+      },
+    );
+
+    test("does not restrict actions to aging vehicles", async () => {
+      const record = vehicleAtAge(45);
+      const { repository, findVehicleById, updateVehicleAction } = createRepository();
+      findVehicleById.mockResolvedValue(record);
+      updateVehicleAction.mockImplementation(async (id, input) => ({ ...record, id, ...input }));
+      const service = createVehicleService({ repository, clock });
+
+      await service.updateVehicleAction(
+        record.id,
+        updateActionBodySchema.parse({ action: "UNDER_REVIEW" }),
+      );
+
+      expect(updateVehicleAction).toHaveBeenCalledWith(
+        record.id,
+        expect.objectContaining({ proposedAction: "UNDER_REVIEW" }),
+      );
+    });
+
+    test("throws VEHICLE_NOT_FOUND before attempting an update", async () => {
+      const { repository, updateVehicleAction } = createRepository();
+      const service = createVehicleService({ repository, clock });
+
+      await expect(
+        service.updateVehicleAction("missing-id", updateActionBodySchema.parse({ action: "NONE" })),
+      ).rejects.toMatchObject({ code: "VEHICLE_NOT_FOUND", status: 404 });
+      expect(updateVehicleAction).not.toHaveBeenCalled();
     });
   });
 });

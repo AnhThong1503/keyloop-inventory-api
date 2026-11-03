@@ -20,6 +20,9 @@ function createTestApp(query?: () => Promise<unknown>) {
   const vehicleRepository: VehicleRepository = {
     findVehicles: vi.fn(async () => ({ items: [], total: 0 })),
     findVehicleById: vi.fn(async () => null),
+    updateVehicleAction: vi.fn(async () => {
+      throw new Error("not implemented by app unit tests");
+    }),
   };
   const app = createApp({
     prisma: createPrismaStub(query),
